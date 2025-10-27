@@ -1,0 +1,212 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fafb;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile-first responsive design */
+.container-responsive {
+    @apply w-full mx-auto px-4;
+}
+
+@media (min-width: 640px) {
+    .container-responsive {
+        @apply px-6;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container-responsive {
+        @apply px-8 max-w-7xl;
+    }
+}
+
+/* Improved table responsiveness */
+.table-container {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive {
+    @apply min-w-full;
+}
+
+/* Better mobile touch targets */
+.btn-mobile {
+    @apply min-h-[44px] min-w-[44px];
+}
+
+/* Improved form elements for mobile */
+.input-mobile {
+    @apply text-base; /* Prevents zoom on iOS */
+}
+
+/* Custom scrollbar for web */
+@media (min-width: 768px) {
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+}
+
+/* Print styles */
+@media print {
+    @page {
+        margin: 0.5in;
+        size: A4;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+    }
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Improved focus styles for accessibility */
+.focus-ring:focus {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+}
+
+/* Better mobile navigation */
+.mobile-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Loading states */
+.loading-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+}
+
+/* Custom utilities for better mobile experience */
+.touch-target {
+    @apply min-h-[44px] min-w-[44px];
+}
+
+.prevent-zoom {
+    font-size: 16px; /* Prevents zoom on iOS */
+}
+
+/* Safe area insets for modern mobile devices */
+.safe-top {
+    padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-left {
+    padding-left: env(safe-area-inset-left);
+}
+
+.safe-right {
+    padding-right: env(safe-area-inset-right);
+}
+
+/* Mobile Bottom Navigation */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Hide sidebar on mobile when bottom nav is active */
+@media (max-width: 1023px) {
+    .lg-sidebar {
+        display: none;
+    }
+}
+
+/* Ensure content doesn't get hidden behind bottom nav */
+.main-content {
+    padding-bottom: 5rem; /* Space for bottom nav */
+}
+
+@media (min-width: 1024px) {
+    .main-content {
+        padding-bottom: 0;
+    }
+}
+
+/* Smooth transitions for navigation */
+.nav-transition {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Active state for bottom nav items */
+.bottom-nav-active {
+    position: relative;
+}
+
+.bottom-nav-active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: #22c55e;
+    border-radius: 50%;
+}
+
+/* Improved touch targets for mobile */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+    overflow-x: hidden;
+}
+
+/* Better scrolling on iOS */
+.main-content {
+    -webkit-overflow-scrolling: touch;
+}

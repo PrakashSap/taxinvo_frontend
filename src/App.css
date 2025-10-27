@@ -36,3 +36,41 @@
     transform: rotate(360deg);
   }
 }
+
+/* Safe area support for mobile devices */
+.h-safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+  height: constant(safe-area-inset-bottom);
+}
+
+/* Ensure content doesn't get hidden behind mobile nav */
+@media (max-width: 475px) {
+  main {
+    padding-bottom: 80px !important;
+  }
+}
+
+/* Add to your global CSS */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.h-safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+}
+
+/* Responsive text for very small screens */
+@media (max-width: 475px) {
+  .xs\\:block {
+    display: block;
+  }
+}
+
+/* Mobile nav fixed positioning */
+.fixed {
+  position: fixed;
+}
