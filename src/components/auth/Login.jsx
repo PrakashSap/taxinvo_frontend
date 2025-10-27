@@ -10,6 +10,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const { user, login, loading, error } = useAuth();
     const navigate = useNavigate();
+    const [showWakeupOverlay, setShowWakeupOverlay] = useState(false);
 
     // Redirect if user is already logged in
     useEffect(() => {
@@ -21,13 +22,21 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Login form submitted'); // Debug log
-
+        // Start a fallback timer — if backend doesn’t respond in 5s, show wake-up overlay
+        const wakeupTimer = setTimeout(() => {
+            if (loading) setShowWakeupOverlay(true);
+        }, 5000);
         const result = await login(username, password);
         console.log('Login result:', result); // Debug log
-
+        clearTimeout(wakeupTimer);
+        setShowWakeupOverlay(false);
         if (result.success) {
             console.log('Login successful, should redirect...'); // Debug log
             // The useEffect above will handle the redirect when user state updates
+        } else if (result.error?.includes('waking up')) {
+            // Show overlay immediately if detected from backend
+            setShowWakeupOverlay(true);
+            setTimeout(() => setShowWakeupOverlay(false), 15000); // Hide after 15s
         }
     };
 
@@ -109,7 +118,7 @@ const Login = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || showWakeupOverlay}
                             className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
@@ -131,6 +140,20 @@ const Login = () => {
                     </div>
                 </div>
             </div>
+            {/* 💤 Server Wake-Up Overlay */}
+            {showWakeupOverlay && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center max-w-sm mx-auto">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600 mb-4"></div>
+                        <p className="text-gray-800 font-medium text-center mb-2">
+                            Server is waking up...
+                        </p>
+                        <p className="text-gray-500 text-sm text-center">
+                            This may take 20–40 seconds on first use.
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

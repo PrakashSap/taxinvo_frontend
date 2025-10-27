@@ -24,7 +24,7 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 10000, // 10 seconds timeout
+    timeout: 65000, // 10 seconds timeout
 });
 
 // Add request interceptor to include user ID
@@ -49,7 +49,7 @@ api.interceptors.response.use(
         console.log(`Response received: ${response.status}`, response.data);
         return response;
     },
-    (error) => {
+    async (error) => {
         console.error('API Error:', {
             message: error.message,
             url: error.config?.url,
@@ -57,6 +57,16 @@ api.interceptors.response.use(
             status: error.response?.status,
             data: error.response?.data
         });
+
+        // 💤 Handle Render cold start (timeout)
+        if (error.code === 'ECONNABORTED' && !error.config._retry) {
+            console.warn("Server might be waking up... retrying in 5 seconds...");
+            error.config._retry = true;
+
+            // Wait 5 seconds then retry the request
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            return api.request(error.config);
+        }
 
         // Handle 401 Unauthorized - redirect to login
         if (error.response?.status === 401) {

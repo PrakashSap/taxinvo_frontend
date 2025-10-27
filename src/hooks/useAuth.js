@@ -64,6 +64,12 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (err) {
             console.error('Login error:', err); // Debug log
+            // 💤 Handle server wake-up timeout nicely
+            if (err.message?.includes('timeout') || err.code === 'ECONNABORTED') {
+                const wakeMsg = 'Server is waking up... please wait a few seconds.';
+                setError(wakeMsg);
+                return { success: false, error: wakeMsg };
+            }
             const errorMsg = err.response?.data?.message || err.message || 'Login failed';
             setError(errorMsg);
             return { success: false, error: errorMsg };
