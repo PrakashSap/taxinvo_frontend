@@ -53,17 +53,21 @@ const SaleForm = ({ isOpen, onClose, onSubmit, loading }) => {
         calculateTotals();
     }, [formData.items]);
 
-    const calculateTotals = () => {
+    const calculateTotals = (items = formData.items) => {
         let subtotal = 0;
         let totalCgst = 0;
         let totalSgst = 0;
 
-        formData.items.forEach(item => {
-            const itemTotal = item.rate * item.quantity;
-            const cgstAmount = itemTotal * (item.cgstRate / 100);
-            const sgstAmount = itemTotal * (item.sgstRate / 100);
+        items.forEach(item => {
+            // 👉 Set `inclusive = false` to treat rate as exclusive of GST
+            const { taxableValue, cgstAmount, sgstAmount } = calculateGstBreakdown(
+                item.rate,
+                item.gstRate,
+                item.quantity,
+                false // change to true if your rate includes GST
+            );
 
-            subtotal += itemTotal;
+            subtotal += taxableValue;
             totalCgst += cgstAmount;
             totalSgst += sgstAmount;
         });
@@ -86,7 +90,38 @@ const SaleForm = ({ isOpen, onClose, onSubmit, loading }) => {
         product.currentStock > 0
     );
 
+    // GST breakdown (supports both inclusive and exclusive modes)
+    const calculateGstBreakdown = (rate, gstRate, quantity, inclusive = true) => {
+        let taxableValue, gstAmount, cgstAmount, sgstAmount, totalAmount;
+
+        if (inclusive) {
+            // When rate is inclusive of GST
+            const gstFactor = 1 + gstRate / 100;
+            taxableValue = (rate / gstFactor) * quantity;
+            gstAmount = (rate * quantity) - taxableValue;
+        } else {
+            // When rate is exclusive of GST
+            taxableValue = rate * quantity;
+            gstAmount = taxableValue * (gstRate / 100);
+        }
+
+        cgstAmount = gstAmount / 2;
+        sgstAmount = gstAmount / 2;
+        totalAmount = taxableValue + gstAmount;
+
+        return {
+            taxableValue,
+            cgstAmount,
+            sgstAmount,
+            gstAmount,
+            totalAmount
+        };
+    };
+
     const handleAddProduct = (product) => {
+        const gstRate = product.gstRate || 0;
+        const cgstRate = gstRate / 2;
+        const sgstRate = gstRate / 2;
         const existingItem = formData.items.find(item => item.productId === product.id);
 
         if (existingItem) {
@@ -104,14 +139,12 @@ const SaleForm = ({ isOpen, onClose, onSubmit, loading }) => {
                 product: product,
                 quantity: 1,
                 rate: product.sellingRate,
-                taxableValue: product.sellingRate,
-                cgstRate: product.gstRate,
-                cgstAmount: product.sellingRate * (product.gstRate / 100),
-                sgstRate: product.gstRate,
-                sgstAmount: product.sellingRate * (product.gstRate / 100),
-                totalAmount: product.sellingRate * (1 + product.gstRate / 100),
+                gstRate,
+                cgstRate,
+                sgstRate,
             };
             setFormData(prev => ({ ...prev, items: [...prev.items, newItem] }));
+            calculateTotals([...formData.items, newItem]);
         }
         setSearchTerm('');
     };
@@ -168,20 +201,18 @@ const SaleForm = ({ isOpen, onClose, onSubmit, loading }) => {
 
         // Prepare items for submission (remove product object, keep only IDs and calculated values)
         const itemsForSubmission = formData.items.map(item => {
-            const itemTotal = item.rate * item.quantity;
-            const cgstAmount = itemTotal * (item.cgstRate / 100);
-            const sgstAmount = itemTotal * (item.sgstRate / 100);
+            const { taxableValue, cgstAmount, sgstAmount, totalAmount } = calculateGstBreakdown(item.rate, item.cgstRate, item.quantity);
 
             return {
                 productId: item.productId,
                 quantity: item.quantity,
                 rate: item.rate,
-                taxableValue: itemTotal,
+                taxableValue,
                 cgstRate: item.cgstRate,
-                cgstAmount: cgstAmount,
+                cgstAmount,
                 sgstRate: item.sgstRate,
-                sgstAmount: sgstAmount,
-                totalAmount: itemTotal + cgstAmount + sgstAmount,
+                sgstAmount,
+                totalAmount
             };
         });
 
@@ -422,10 +453,10 @@ const SaleForm = ({ isOpen, onClose, onSubmit, loading }) => {
                                             />
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">
-                                            {item.cgstRate}%
+                                            {(item.cgstRate + item.sgstRate).toFixed(2)}%
                                         </td>
                                         <td className="px-4 py-3 font-medium">
-                                            {formatCurrency(item.rate * item.quantity * (1 + item.cgstRate / 100))}
+                                            {formatCurrency(item.rate * item.quantity * (1 + (item.cgstRate + item.sgstRate) / 100))}
                                         </td>
                                         <td className="px-4 py-3">
                                             <button

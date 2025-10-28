@@ -245,7 +245,7 @@ const ProductForm = ({ isOpen, onClose, product, onSubmit, loading }) => {
                     {/* Purchase Rate */}
                     <div>
                         <label htmlFor="purchaseRate" className="block text-sm font-medium text-gray-700">
-                            Purchase Rate (₹)
+                            Purchase Rate (₹)- Including GST
                         </label>
                         <input
                             type="number"
@@ -266,7 +266,7 @@ const ProductForm = ({ isOpen, onClose, product, onSubmit, loading }) => {
                     {/* Selling Rate */}
                     <div>
                         <label htmlFor="sellingRate" className="block text-sm font-medium text-gray-700">
-                            Selling Rate (₹) *
+                            Selling Rate (₹) * - Including GST
                         </label>
                         <input
                             type="number"

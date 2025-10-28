@@ -42,22 +42,50 @@ const PurchaseForm = ({ isOpen, onClose, onSubmit, loading }) => {
         calculateTotals();
     }, [formData.items]);
 
+    const calculateGstBreakdown = (totalValue, gstRate) => {
+        // Calculate taxable value (excluding GST)
+        // Formula: Taxable Value = Total Value / (1 + GST Rate/100)
+        const gstFactor = 1 + (gstRate / 100);
+        const taxableValue = totalValue / gstFactor;
+
+        // Calculate GST amount
+        const gstAmount = totalValue - taxableValue;
+
+        // Split equally for CGST and SGST
+        const cgstAmount = gstAmount / 2;
+        const sgstAmount = cgstAmount;
+
+        return {
+            taxableValue,
+            cgstAmount,
+            sgstAmount,
+            gstAmount
+        };
+    };
+
     const calculateTotals = () => {
         let subtotal = 0;
         let totalCgst = 0;
         let totalSgst = 0;
+        let grandTotal = 0;
 
         formData.items.forEach(item => {
+            // Total value including GST
             const itemTotal = item.rate * item.quantity;
-            const cgstAmount = itemTotal * (item.gstRate / 100);
-            const sgstAmount = itemTotal * (item.gstRate / 100);
 
-            subtotal += itemTotal;
-            totalCgst += cgstAmount;
-            totalSgst += sgstAmount;
+            // Calculate GST breakdown
+            const gstBreakdown = calculateGstBreakdown(itemTotal, item.gstRate);
+
+            subtotal += gstBreakdown.taxableValue;
+            totalCgst += gstBreakdown.cgstAmount;
+            totalSgst += gstBreakdown.sgstAmount;
+            grandTotal += itemTotal; // This is the total including GST
         });
 
-        const grandTotal = subtotal + totalCgst + totalSgst;
+        // Round to 2 decimal places
+        subtotal = Math.round(subtotal * 100) / 100;
+        totalCgst = Math.round(totalCgst * 100) / 100;
+        totalSgst = Math.round(totalSgst * 100) / 100;
 
         setCalculations({
             subtotal,
@@ -164,7 +192,7 @@ const PurchaseForm = ({ isOpen, onClose, onSubmit, loading }) => {
         const itemsForSubmission = formData.items.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            rate: item.rate,
+            rate: item.rate, // This rate INCLUDES GST
             batchNumber: item.batchNumber,
             expiryDate: item.expiryDate,
         }));
@@ -308,80 +336,91 @@ const PurchaseForm = ({ isOpen, onClose, onSubmit, loading }) => {
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Batch No</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expiry</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate (incl. GST)</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount (incl. GST)</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                {formData.items.map((item) => (
-                                    <tr key={item.productId}>
-                                        <td className="px-4 py-3">
-                                            <div>
-                                                <p className="font-medium text-gray-900">{item.product.name}</p>
-                                                <p className="text-sm text-gray-500">{item.product.hsnCode}</p>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="text"
-                                                value={item.batchNumber}
-                                                onChange={(e) => handleBatchNumberChange(item.productId, e.target.value)}
-                                                className="w-24 border border-gray-300 rounded px-2 py-1 text-sm"
-                                                placeholder="Batch No"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="date"
-                                                value={item.expiryDate}
-                                                onChange={(e) => handleExpiryDateChange(item.productId, e.target.value)}
-                                                className="w-32 border border-gray-300 rounded px-2 py-1 text-sm"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center space-x-2">
+                                {formData.items.map((item) => {
+                                    const itemTotal = item.rate * item.quantity;
+                                    const gstBreakdown = calculateGstBreakdown(itemTotal, item.gstRate);
+
+                                    return (
+                                        <tr key={item.productId}>
+                                            <td className="px-4 py-3">
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{item.product.name}</p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {item.product.hsnCode} • GST: {item.gstRate}%
+                                                    </p>
+                                                    <p className="text-xs text-gray-400">
+                                                        Base: {formatCurrency(gstBreakdown.taxableValue)} +
+                                                        GST: {formatCurrency(gstBreakdown.gstAmount)}
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="text"
+                                                    value={item.batchNumber}
+                                                    onChange={(e) => handleBatchNumberChange(item.productId, e.target.value)}
+                                                    className="w-24 border border-gray-300 rounded px-2 py-1 text-sm"
+                                                    placeholder="Batch No"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="date"
+                                                    value={item.expiryDate}
+                                                    onChange={(e) => handleExpiryDateChange(item.productId, e.target.value)}
+                                                    className="w-32 border border-gray-300 rounded px-2 py-1 text-sm"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                                                        className="p-1 rounded border border-gray-300 hover:bg-gray-100"
+                                                    >
+                                                        <Minus className="h-3 w-3" />
+                                                    </button>
+                                                    <span className="w-12 text-center">{item.quantity}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                                                        className="p-1 rounded border border-gray-300 hover:bg-gray-100"
+                                                    >
+                                                        <Plus className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="number"
+                                                    value={item.rate}
+                                                    onChange={(e) => handleRateChange(item.productId, e.target.value)}
+                                                    className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                                                    min="0"
+                                                    step="0.01"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-3 font-medium">
+                                                {formatCurrency(itemTotal)}
+                                            </td>
+                                            <td className="px-4 py-3">
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
-                                                    className="p-1 rounded border border-gray-300 hover:bg-gray-100"
+                                                    onClick={() => handleRemoveItem(item.productId)}
+                                                    className="text-red-600 hover:text-red-800"
                                                 >
-                                                    <Minus className="h-3 w-3" />
+                                                    <Trash2 className="h-4 w-4" />
                                                 </button>
-                                                <span className="w-12 text-center">{item.quantity}</span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                                                    className="p-1 rounded border border-gray-300 hover:bg-gray-100"
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="number"
-                                                value={item.rate}
-                                                onChange={(e) => handleRateChange(item.productId, e.target.value)}
-                                                className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
-                                                min="0"
-                                                step="0.01"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3 font-medium">
-                                            {formatCurrency(item.rate * item.quantity)}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveItem(item.productId)}
-                                                className="text-red-600 hover:text-red-800"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                                 </tbody>
                             </table>
                         </div>
@@ -394,23 +433,23 @@ const PurchaseForm = ({ isOpen, onClose, onSubmit, loading }) => {
                         <h3 className="text-lg font-medium text-gray-900 mb-4">Purchase Summary</h3>
                         <div className="space-y-2">
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Subtotal:</span>
+                                <span className="text-gray-600">Subtotal (excl. GST):</span>
                                 <span className="font-medium">{formatCurrency(calculations.subtotal)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-600">CGST:</span>
+                                <span className="text-gray-600">CGST ({calculations.totalCgst > 0 ? (calculations.totalCgst / calculations.subtotal * 100).toFixed(1) : '0'}%):</span>
                                 <span className="font-medium">{formatCurrency(calculations.totalCgst)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-600">SGST:</span>
+                                <span className="text-gray-600">SGST ({calculations.totalSgst > 0 ? (calculations.totalSgst / calculations.subtotal * 100).toFixed(1) : '0'}%):</span>
                                 <span className="font-medium">{formatCurrency(calculations.totalSgst)}</span>
                             </div>
                             <div className="flex justify-between border-t border-gray-300 pt-2">
-                                <span className="text-lg font-semibold">Grand Total:</span>
+                                <span className="text-lg font-semibold">Grand Total (incl. GST):</span>
                                 <span className="text-lg font-semibold flex items-center">
-                  <IndianRupee className="h-4 w-4 mr-1" />
+                                    <IndianRupee className="h-4 w-4 mr-1" />
                                     {formatCurrency(calculations.grandTotal)}
-                </span>
+                                </span>
                             </div>
                         </div>
                     </div>

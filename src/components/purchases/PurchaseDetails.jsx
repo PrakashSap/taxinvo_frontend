@@ -21,6 +21,21 @@ const PurchaseDetails = ({ purchase, isOpen, onClose }) => {
         });
     };
 
+    // Calculate GST breakdown for display
+    const calculateGstPercentage = () => {
+        if (!purchase.totalAmount || purchase.totalAmount === 0) return { cgst: 0, sgst: 0 };
+
+        const totalGst = (purchase.totalCgst || 0) + (purchase.totalSgst || 0);
+        const gstRate = (totalGst / purchase.totalAmount) * 100;
+
+        return {
+            cgst: (gstRate / 2).toFixed(1),
+            sgst: (gstRate / 2).toFixed(1)
+        };
+    };
+
+    const gstPercentages = calculateGstPercentage();
+
     if (!purchase) return null;
 
     return (
@@ -84,8 +99,8 @@ const PurchaseDetails = ({ purchase, isOpen, onClose }) => {
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Batch No</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expiry</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate (incl. GST)</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount (incl. GST)</th>
                             </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
@@ -94,7 +109,9 @@ const PurchaseDetails = ({ purchase, isOpen, onClose }) => {
                                     <td className="px-4 py-3">
                                         <div>
                                             <p className="font-medium text-gray-900">{item.product?.name}</p>
-                                            <p className="text-sm text-gray-500">{item.product?.hsnCode}</p>
+                                            <p className="text-sm text-gray-500">
+                                                {item.product?.hsnCode} • GST: {item.product?.gstRate}%
+                                            </p>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-gray-900">
@@ -120,23 +137,23 @@ const PurchaseDetails = ({ purchase, isOpen, onClose }) => {
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Purchase Summary</h3>
                     <div className="space-y-2">
                         <div className="flex justify-between">
-                            <span className="text-gray-600">Subtotal:</span>
+                            <span className="text-gray-600">Subtotal (excl. GST):</span>
                             <span className="font-medium">{formatCurrency(purchase.totalAmount)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-600">CGST:</span>
+                            <span className="text-gray-600">CGST ({gstPercentages.cgst}%):</span>
                             <span className="font-medium">{formatCurrency(purchase.totalCgst)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-600">SGST:</span>
+                            <span className="text-gray-600">SGST ({gstPercentages.sgst}%):</span>
                             <span className="font-medium">{formatCurrency(purchase.totalSgst)}</span>
                         </div>
                         <div className="flex justify-between border-t border-gray-300 pt-2">
-                            <span className="text-lg font-semibold">Grand Total:</span>
+                            <span className="text-lg font-semibold">Grand Total (incl. GST):</span>
                             <span className="text-lg font-semibold flex items-center">
-                <IndianRupee className="h-4 w-4 mr-1" />
+                                <IndianRupee className="h-4 w-4 mr-1" />
                                 {formatCurrency(purchase.grandTotal)}
-              </span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -150,7 +167,8 @@ const PurchaseDetails = ({ purchase, isOpen, onClose }) => {
                     <div className="text-sm text-blue-700">
                         <p>This purchase has increased your inventory stock levels.</p>
                         <p className="mt-1">
-                            Total items received: <strong>{purchase.items?.length || 0}</strong> products
+                            Total items received: <strong>{purchase.items?.length || 0}</strong> products •
+                            Total quantity: <strong>{purchase.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}</strong> units
                         </p>
                     </div>
                 </div>
