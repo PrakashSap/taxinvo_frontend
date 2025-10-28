@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MoreVertical, Edit, Trash2, User, CreditCard, Phone, MapPin } from 'lucide-react';
 import Button from '../common/Button';
 
-const CustomersTable = ({ customers, onEdit, onDelete, loading }) => {
+const CustomersTable = ({ customers, onEdit, onDelete, onCreditDetails, loading }) => {
     const [actionMenu, setActionMenu] = useState(null);
 
     const formatCurrency = (amount) => {
@@ -26,8 +26,8 @@ const CustomersTable = ({ customers, onEdit, onDelete, loading }) => {
 
         return (
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[type]}`}>
-        {labels[type]}
-      </span>
+                {labels[type]}
+            </span>
         );
     };
 
@@ -60,6 +60,14 @@ const CustomersTable = ({ customers, onEdit, onDelete, loading }) => {
         event.stopPropagation();
         setActionMenu(null);
         onDelete(customer);
+    };
+
+    const handleCreditDetails = (customer, event) => {
+        event.stopPropagation();
+        setActionMenu(null);
+        if (onCreditDetails) {
+            onCreditDetails(customer);
+        }
     };
 
     if (loading) {
@@ -163,8 +171,8 @@ const CustomersTable = ({ customers, onEdit, onDelete, loading }) => {
                                             </div>
                                             {creditStatus && (
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1 ${creditStatus.color}`}>
-                            {creditStatus.status}
-                          </span>
+                                                    {creditStatus.status}
+                                                </span>
                                             )}
                                         </div>
                                     ) : (
@@ -172,13 +180,13 @@ const CustomersTable = ({ customers, onEdit, onDelete, loading }) => {
                                     )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        customer.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                    }`}>
-                      {customer.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                        customer.isActive
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {customer.isActive ? 'Active' : 'Inactive'}
+                                    </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
                                     <div className="flex justify-end">
@@ -198,6 +206,13 @@ const CustomersTable = ({ customers, onEdit, onDelete, loading }) => {
                                                     >
                                                         <Edit className="h-4 w-4 mr-2" />
                                                         Edit Customer
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleCreditDetails(customer, e)}
+                                                        className="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-gray-100 w-full text-left"
+                                                    >
+                                                        <CreditCard className="h-4 w-4 mr-2" />
+                                                        Credit Details
                                                     </button>
                                                     <button
                                                         onClick={(e) => handleDelete(customer, e)}

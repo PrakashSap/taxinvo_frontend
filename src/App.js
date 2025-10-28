@@ -7,6 +7,8 @@ import Products from "./pages/Products";
 import Sales from "./pages/Sales";
 import Purchases from "./pages/Purchases";
 import Customers from "./pages/Customers";
+import CreditTracking from "./pages/CreditTracking";
+import Payments from "./pages/Payments";
 import Login from "./components/auth/Login";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./hooks/useAuth";
@@ -56,6 +58,23 @@ function App() {
                         <ProtectedRoute>
                             <Layout>
                                 <Purchases />
+                            </Layout>
+                        </ProtectedRoute>
+                    } />
+
+                    {/* Add the new routes */}
+                    <Route path="/credit-tracking" element={
+                        <ProtectedRoute>
+                            <Layout>
+                                <CreditTracking />
+                            </Layout>
+                        </ProtectedRoute>
+                    } />
+
+                    <Route path="/payments" element={
+                        <ProtectedRoute>
+                            <Layout>
+                                <Payments />
                             </Layout>
                         </ProtectedRoute>
                     } />

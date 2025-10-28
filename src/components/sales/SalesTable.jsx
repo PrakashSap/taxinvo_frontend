@@ -129,7 +129,7 @@ const SalesTable = ({ sales, loading, onView }) => {
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div className="flex justify-end space-x-2">
+                                <div className="flex justify-end space-x-2 action-menu-container relative">
                                     <SimplePrintInvoice
                                         invoiceData={sale}
                                         type="sale"

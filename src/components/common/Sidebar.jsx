@@ -1,78 +1,76 @@
-// components/common/SideBar.jsx
+// components/common/Sidebar.jsx
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
     LayoutDashboard,
     Package,
     ShoppingCart,
     Users,
-    Truck
+    Truck,
+    CreditCard,
+    IndianRupee,
+    X
 } from 'lucide-react';
 
-const SideBar = () => {
-    const location = useLocation();
-
+const SideBar = ({ currentPath, onClose }) => {
     const navigation = [
-        { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+        { name: 'Dashboard', href: '/', icon: LayoutDashboard, exact: true },
         { name: 'Products', href: '/products', icon: Package },
         { name: 'Sales', href: '/sales', icon: ShoppingCart },
         { name: 'Customers', href: '/customers', icon: Users },
         { name: 'Purchases', href: '/purchases', icon: Truck },
+        { name: 'Credit Tracking', href: '/credit-tracking', icon: CreditCard },
+        { name: 'Payments', href: '/payments', icon: IndianRupee },
     ];
 
-    const isActive = (href) => {
-        if (href === '/') {
-            return location.pathname === '/';
-        }
-        return location.pathname.startsWith(href);
-    };
-
     return (
-        <div className="w-64 bg-white shadow-lg h-full flex flex-col">
-            {/* Logo */}
-            <div className="flex items-center p-4 border-b border-gray-200">
-                {/*<div className="bg-primary-600 p-2 rounded-lg">*/}
-                {/*    /!*<LayoutDashboard className="h-6 w-6 text-white" />*!/*/}
-                {/*</div>*/}
-                <div className="ml-3">
-                    <h1 className="text-lg font-semibold text-gray-900">
-                        Sri DhanaLakshmi Trader
-                    </h1>
-                    <p className="text-xs text-gray-500">Fertilizer Store</p>
+        <div className="flex flex-col w-64 bg-white border-r border-gray-200 h-full">
+            {/* Close button for mobile */}
+            {onClose && (
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 md:hidden">
+                    <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
+                    <button
+                        onClick={onClose}
+                        className="p-1 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                        <X className="h-6 w-6" />
+                    </button>
                 </div>
-            </div>
+            )}
 
             {/* Navigation */}
-            <nav className="flex-1 px-4 py-6 space-y-2">
+            <nav className="flex-1 px-4 py-4 space-y-1">
                 {navigation.map((item) => {
                     const Icon = item.icon;
-                    const active = isActive(item.href);
+                    const isActive = item.exact
+                        ? currentPath === item.href
+                        : currentPath.startsWith(item.href);
 
                     return (
                         <NavLink
                             key={item.name}
                             to={item.href}
-                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                active
-                                    ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                            }`}
+                            className={({ isActive: navIsActive }) =>
+                                `group flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                                    (item.exact ? currentPath === item.href : navIsActive)
+                                        ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-700'
+                                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                }`
+                            }
+                            onClick={onClose} // Close sidebar on mobile when item is clicked
                         >
-                            <Icon className={`h-5 w-5 mr-3 ${
-                                active ? 'text-primary-600' : 'text-gray-400'
-                            }`} />
+                            <Icon
+                                className={`mr-3 h-5 w-5 ${
+                                    (item.exact ? currentPath === item.href : currentPath.startsWith(item.href))
+                                        ? 'text-primary-700'
+                                        : 'text-gray-400 group-hover:text-gray-500'
+                                }`}
+                            />
                             {item.name}
                         </NavLink>
                     );
                 })}
             </nav>
-
-            {/* Footer */}
-            <div className="p-4 border-t border-gray-200">
-                <div className="text-xs text-gray-500 text-center">
-                    © 2025 Taxinvo. All rights reserved.
-                </div>
-            </div>
         </div>
     );
 };

@@ -46,7 +46,7 @@
 /* Ensure content doesn't get hidden behind mobile nav */
 @media (max-width: 475px) {
   main {
-    padding-bottom: 80px !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
   }
 }
 
@@ -71,6 +71,6 @@
 }
 
 /* Mobile nav fixed positioning */
-.fixed {
-  position: fixed;
+.modal-open .mobile-nav {
+  display: none !important;
 }

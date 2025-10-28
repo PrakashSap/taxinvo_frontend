@@ -7,6 +7,7 @@ import FilterSelect from '../components/common/FilterSelect';
 import CustomersTable from '../components/customers/CustomersTable';
 import CustomerForm from '../components/customers/CustomerForm';
 import CustomerDetails from '../components/customers/CustomerDetails';
+import CustomerCreditDetails from '../components/CreditTracking/CustomerCreditDetails';
 
 const Customers = () => {
     const {
@@ -24,6 +25,8 @@ const Customers = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [showCustomerForm, setShowCustomerForm] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState(null);
+    const [showDetails, setShowDetails] = useState(false);
+    const [showCreditDetails, setShowCreditDetails] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [formLoading, setFormLoading] = useState(false);
 
@@ -87,8 +90,13 @@ const Customers = () => {
 
     const handleViewCustomer = (customer) => {
         setSelectedCustomer(customer);
+        setShowDetails(true);
     };
 
+    const handleCreditDetails = (customer) => {
+        setSelectedCustomer(customer);
+        setShowCreditDetails(true);
+    };
     const handleCloseDetails = () => {
         setSelectedCustomer(null);
     };
@@ -272,6 +280,7 @@ const Customers = () => {
                 customers={filteredCustomers}
                 onEdit={handleEditCustomer}
                 onDelete={handleDeleteCustomer}
+                onCreditDetails={handleCreditDetails}
                 loading={loading}
             />
 
@@ -290,6 +299,14 @@ const Customers = () => {
                     customer={selectedCustomer}
                     isOpen={!!selectedCustomer}
                     onClose={handleCloseDetails}
+                />
+            )}
+           {/*Add this to your modals section after CustomerDetails*/}
+            {selectedCustomer && (
+                <CustomerCreditDetails
+                    customer={selectedCustomer}
+                    isOpen={showCreditDetails}
+                    onClose={() => setShowCreditDetails(false)}
                 />
             )}
         </div>

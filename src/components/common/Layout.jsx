@@ -16,12 +16,11 @@ const Layout = ({ children }) => {
     };
 
     const handleBack = () => {
-        // You can implement back navigation logic here if needed
         window.history.back();
     };
 
     // Determine if we should show back button (not on root pages)
-    const shouldShowBack = !['/', '/products', '/sales', '/customers', '/purchases'].includes(location.pathname);
+    const shouldShowBack = !['/','/products','/purchases','/sales','/customers','/credit-tracking','/payments'].includes(location.pathname);
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
@@ -37,7 +36,7 @@ const Layout = ({ children }) => {
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar - Desktop only */}
                 <div className="hidden md:flex md:flex-shrink-0">
-                    <SideBar />
+                    <SideBar currentPath={location.pathname} />
                 </div>
 
                 {/* Mobile Sidebar - Conditionally rendered */}
@@ -48,14 +47,14 @@ const Layout = ({ children }) => {
                             onClick={() => setSidebarOpen(false)}
                         />
                         <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
-                            <SideBar />
+                            <SideBar currentPath={location.pathname} />
                         </div>
                     </div>
                 )}
 
                 {/* Page content */}
-                <main className="flex-1 overflow-auto pb-16 md:pb-0 pt-16 md:pt-0">
-                    <div className="p-4 sm:p-6 lg:p-8">
+                <main className="flex-1 overflow-auto pb-safe md:pb-0 pt-16 md:pt-0">
+                    <div className="p-4 sm:p-6 lg:p-8 pb-32 md:pb-8">
                         {children}
                     </div>
                 </main>

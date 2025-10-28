@@ -1,7 +1,7 @@
 import React from 'react';
 import { IndianRupee, Calendar, User, CreditCard } from 'lucide-react';
 import Modal from '../common/Modal';
-import PrintInvoice from '../common/PrintInvoice';
+import SimplePrintInvoice from '../common/SimplePrintInvoice';
 
 const SaleDetails = ({ sale, isOpen, onClose }) => {
     const formatCurrency = (amount) => {
@@ -146,7 +146,7 @@ const SaleDetails = ({ sale, isOpen, onClose }) => {
 
                 {/* Actions */}
                 <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                    <PrintInvoice
+                    <SimplePrintInvoice
                         invoiceData={sale}
                         type="sale"
                         buttonText="Print Invoice"

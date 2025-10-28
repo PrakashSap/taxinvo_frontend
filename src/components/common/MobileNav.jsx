@@ -1,4 +1,4 @@
-// components/common/MobileNav.jsx (Compact Version)
+// components/common/MobileNav.jsx
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
@@ -7,6 +7,8 @@ import {
     ShoppingCart,
     Users,
     Truck,
+    CreditCard,
+    IndianRupee
 } from 'lucide-react';
 
 const MobileNav = () => {
@@ -18,6 +20,8 @@ const MobileNav = () => {
         { name: 'Sales', href: '/sales', icon: ShoppingCart },
         { name: 'Customers', href: '/customers', icon: Users },
         { name: 'Purchases', href: '/purchases', icon: Truck },
+        { name: 'Credit', href: '/credit-tracking', icon: CreditCard },
+        { name: 'Payments', href: '/payments', icon: IndianRupee },
     ];
 
     const isActive = (href) => {
@@ -28,7 +32,7 @@ const MobileNav = () => {
     };
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="mobile-nav md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
             <nav className="flex justify-around items-center py-2">
                 {navigation.map((item) => {
                     const Icon = item.icon;
